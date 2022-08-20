@@ -208,7 +208,7 @@ void WaveshareEPaper::on_safe_shutdown() { this->deep_sleep(); }
 // ========================================================
 
 void WaveshareEPaperTypeA::initialize() {
-  if ((this->model_ == TTGO_EPAPER_2_13_IN_B74) || (this->model_ == WAVESHARE_EPAPER_1_54_IN_V2)) || (this->model_ == WAVESHARE_EPAPER_2_9_IN_V2)){
+  if ((this->model_ == TTGO_EPAPER_2_13_IN_B74) || (this->model_ == WAVESHARE_EPAPER_1_54_IN_V2) || (this->model_ == WAVESHARE_EPAPER_2_9_IN_V2)){
     this->reset_pin_->digital_write(false);
     delay(10);
     this->reset_pin_->digital_write(true);
