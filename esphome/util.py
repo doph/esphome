@@ -1,5 +1,4 @@
-import typing
-from typing import Union, List
+from typing import Union
 
 import collections
 import io
@@ -35,7 +34,7 @@ class RegistryEntry:
         return Schema(self.raw_schema)
 
 
-class Registry(dict):
+class Registry(dict[str, RegistryEntry]):
     def __init__(self, base_schema=None, type_id_key=None):
         super().__init__()
         self.base_schema = base_schema or {}
@@ -58,7 +57,33 @@ class SimpleRegistry(dict):
         return decorator
 
 
-def safe_print(message=""):
+def _final_validate(parent_id_key, fun):
+    def validator(fconf, pin_config):
+        import esphome.config_validation as cv
+
+        parent_path = fconf.get_path_for_id(pin_config[parent_id_key])[:-1]
+        parent_config = fconf.get_config_for_path(parent_path)
+
+        pin_path = fconf.get_path_for_id(pin_config[const.CONF_ID])[:-1]
+        with cv.prepend_path([cv.ROOT_CONFIG_PATH] + pin_path):
+            fun(pin_config, parent_config)
+
+    return validator
+
+
+class PinRegistry(dict):
+    def register(self, name, schema, final_validate=None):
+        if final_validate is not None:
+            final_validate = _final_validate(name, final_validate)
+
+        def decorator(fun):
+            self[name] = (fun, schema, final_validate)
+            return fun
+
+        return decorator
+
+
+def safe_print(message="", end="\n"):
     from esphome.core import CORE
 
     if CORE.dashboard:
@@ -68,18 +93,24 @@ def safe_print(message=""):
             pass
 
     try:
-        print(message)
+        print(message, end=end)
         return
     except UnicodeEncodeError:
         pass
 
     try:
-        print(message.encode("utf-8", "backslashreplace"))
+        print(message.encode("utf-8", "backslashreplace"), end=end)
     except UnicodeEncodeError:
         try:
-            print(message.encode("ascii", "backslashreplace"))
+            print(message.encode("ascii", "backslashreplace"), end=end)
         except UnicodeEncodeError:
             print("Cannot print line because of invalid locale!")
+
+
+def safe_input(prompt=""):
+    if prompt:
+        safe_print(prompt, end="")
+    return input()
 
 
 def shlex_quote(s):
@@ -191,7 +222,7 @@ def run_external_command(
     try:
         sys.argv = list(cmd)
         sys.exit = mock_exit
-        return func() or 0
+        retval = func() or 0
     except KeyboardInterrupt:  # pylint: disable=try-except-raise
         raise
     except SystemExit as err:
@@ -207,9 +238,10 @@ def run_external_command(
         sys.stdout = orig_stdout
         sys.stderr = orig_stderr
 
-        if capture_stdout:
-            # pylint: disable=lost-exception
-            return cap_stdout.getvalue()
+    if capture_stdout:
+        return cap_stdout.getvalue()
+
+    return retval
 
 
 def run_external_process(*cmd, **kwargs):
@@ -242,7 +274,7 @@ def is_dev_esphome_version():
     return "dev" in const.__version__
 
 
-def parse_esphome_version() -> typing.Tuple[int, int, int]:
+def parse_esphome_version() -> tuple[int, int, int]:
     match = re.match(r"^(\d+).(\d+).(\d+)(-dev\d*|b\d*)?$", const.__version__)
     if match is None:
         raise ValueError(f"Failed to parse ESPHome version '{const.__version__}'")
@@ -282,7 +314,7 @@ class SerialPort:
 
 
 # from https://github.com/pyserial/pyserial/blob/master/serial/tools/list_ports.py
-def get_serial_ports() -> List[SerialPort]:
+def get_serial_ports() -> list[SerialPort]:
     from serial.tools.list_ports import comports
 
     result = []

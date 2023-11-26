@@ -49,6 +49,8 @@ class HydreonRGxxComponent : public PollingComponent, public uart::UARTDevice {
 
   float get_setup_priority() const override;
 
+  void set_disable_led(bool disable_led) { this->disable_led_ = disable_led; }
+
  protected:
   void process_line_();
   void schedule_reboot_();
@@ -58,9 +60,9 @@ class HydreonRGxxComponent : public PollingComponent, public uart::UARTDevice {
 
   sensor::Sensor *sensors_[NUM_SENSORS] = {nullptr};
 #ifdef USE_BINARY_SENSOR
-  binary_sensor::BinarySensor *too_cold_sensor_ = nullptr;
-  binary_sensor::BinarySensor *lens_bad_sensor_ = nullptr;
-  binary_sensor::BinarySensor *em_sat_sensor_ = nullptr;
+  binary_sensor::BinarySensor *too_cold_sensor_{nullptr};
+  binary_sensor::BinarySensor *lens_bad_sensor_{nullptr};
+  binary_sensor::BinarySensor *em_sat_sensor_{nullptr};
 #endif
 
   int16_t boot_count_ = 0;
@@ -72,6 +74,7 @@ class HydreonRGxxComponent : public PollingComponent, public uart::UARTDevice {
   bool lens_bad_ = false;
   bool em_sat_ = false;
   bool request_temperature_ = false;
+  bool disable_led_ = false;
 
   // bit field showing which sensors we have received data for
   int sensors_received_ = -1;

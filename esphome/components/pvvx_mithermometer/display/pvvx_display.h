@@ -4,6 +4,8 @@
 #include "esphome/core/defines.h"
 #include "esphome/components/ble_client/ble_client.h"
 
+#include <cinttypes>
+
 #ifdef USE_ESP32
 #include <esp_gattc_api.h>
 #ifdef USE_TIME
@@ -114,7 +116,7 @@ class PVVXDisplay : public ble_client::BLEClientNode, public PollingComponent {
   void delayed_disconnect_();
 #ifdef USE_TIME
   void sync_time_();
-  time::RealTimeClock *time_ = nullptr;
+  time::RealTimeClock *time_{nullptr};
 #endif
   uint16_t char_handle_ = 0;
   bool connection_established_ = false;
