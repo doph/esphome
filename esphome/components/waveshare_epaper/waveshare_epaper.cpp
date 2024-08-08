@@ -289,7 +289,7 @@ void WaveshareEPaperTypeA::initialize() {
     switch (this->model_) {
       // More models can be added here to enable deep sleep if eligible
       case WAVESHARE_EPAPER_1_54_IN:
-      case WAVESHARE_EPAPER_1_54_IN_V2:
+      //case WAVESHARE_EPAPER_1_54_IN_V2:
         this->deep_sleep_between_updates_ = true;
         ESP_LOGI(TAG, "Set the display to deep sleep");
         this->deep_sleep();
@@ -300,7 +300,7 @@ void WaveshareEPaperTypeA::initialize() {
   }
 }
 void WaveshareEPaperTypeA::init_display_() {
-  if (this->model_ == TTGO_EPAPER_2_13_IN_B74 || this->model_ == WAVESHARE_EPAPER_2_13_IN_V2) {
+  if (this->model_ == TTGO_EPAPER_2_13_IN_B74 || this->model_ == WAVESHARE_EPAPER_2_13_IN_V2 || this->model_ == WAVESHARE_EPAPER_1_54_IN_V2) {
     if (this->reset_pin_ != nullptr) {
       this->reset_pin_->digital_write(false);
       delay(10);
