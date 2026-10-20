@@ -19,6 +19,8 @@ class WaveshareModel(EpaperModel):
         sequence_full: tuple[tuple[int, ...], ...] = (),
         sequence_partial: tuple[tuple[int, ...], ...] = (),
         base_image_required: bool = False,
+        partial_refresh_mode: int = 0x0F,
+        sleep_between_partial_updates: bool = True,
         class_name: str = "EpaperWaveshare",
         **defaults: Any,
     ) -> None:
@@ -30,6 +32,8 @@ class WaveshareModel(EpaperModel):
         self.sequence_full = sequence_full
         self.sequence_partial = sequence_partial
         self.base_image_required = base_image_required
+        self.partial_refresh_mode = partial_refresh_mode
+        self.sleep_between_partial_updates = sleep_between_partial_updates
 
     def _array_arg(
         self, config: ConfigType, suffix: str, data: Sequence[int] | None
@@ -54,6 +58,8 @@ class WaveshareModel(EpaperModel):
                 config, "_sequence_partial", flatten_sequence(self.sequence_partial)
             ),
             self.base_image_required,
+            self.partial_refresh_mode,
+            self.sleep_between_partial_updates,
         )
 
 
@@ -241,4 +247,6 @@ WaveshareModel(
         (0x37, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00),
     ),
     base_image_required=True,
+    partial_refresh_mode=0xCF,
+    sleep_between_partial_updates=False,
 )

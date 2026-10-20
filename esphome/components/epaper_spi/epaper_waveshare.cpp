@@ -40,7 +40,7 @@ void EpaperWaveshare::set_window() {
 
 void EpaperWaveshare::refresh_screen(bool partial) {
   if (partial) {
-    this->cmd_data(0x22, {0x0F});
+    this->cmd_data(0x22, {this->partial_refresh_mode_});
   } else {
     this->cmd_data(0x22, {0xC7});
   }
@@ -48,7 +48,12 @@ void EpaperWaveshare::refresh_screen(bool partial) {
   this->next_delay_ = partial ? 100 : 3000;
 }
 
-void EpaperWaveshare::deep_sleep() { this->cmd_data(0x10, {0x01}); }
+void EpaperWaveshare::deep_sleep() {
+  // Some panels fade partial updates after waking from deep sleep, so they stay awake while partial updates continue
+  if (!this->sleep_between_partial_updates_ && this->is_using_partial_update_() && this->update_count_ != 0)
+    return;
+  this->cmd_data(0x10, {0x01});
+}
 
 bool EpaperWaveshare::reset() {
   // Skip the software reset (0x12) EPaperMono adds: it restarts the alternation between the two RAM

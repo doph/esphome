@@ -12,7 +12,8 @@ class EpaperWaveshare final : public EPaperMono {
                   size_t init_sequence_length, const uint8_t *lut, size_t lut_length, const uint8_t *partial_lut,
                   uint16_t partial_lut_length, const uint8_t *full_sequence = nullptr, size_t full_sequence_length = 0,
                   const uint8_t *partial_sequence = nullptr, size_t partial_sequence_length = 0,
-                  bool base_image_required = false)
+                  bool base_image_required = false, uint8_t partial_refresh_mode = 0x0F,
+                  bool sleep_between_partial_updates = true)
       : EPaperMono(name, width, height, init_sequence, init_sequence_length),
         lut_(lut),
         partial_lut_(partial_lut),
@@ -22,7 +23,9 @@ class EpaperWaveshare final : public EPaperMono {
         full_sequence_length_(full_sequence_length),
         partial_sequence_length_(partial_sequence_length),
         partial_lut_length_(partial_lut_length),
-        base_image_required_(base_image_required) {
+        base_image_required_(base_image_required),
+        partial_refresh_mode_(partial_refresh_mode),
+        sleep_between_partial_updates_(sleep_between_partial_updates) {
     this->send_red_as_image_ = base_image_required;
   }
 
@@ -44,5 +47,8 @@ class EpaperWaveshare final : public EPaperMono {
   size_t partial_sequence_length_;
   uint16_t partial_lut_length_;
   bool base_image_required_;
+  // Display update control 2 (0x22) value for a partial refresh; it differs between Waveshare's samples.
+  uint8_t partial_refresh_mode_;
+  bool sleep_between_partial_updates_;
 };
 }  // namespace esphome::epaper_spi
